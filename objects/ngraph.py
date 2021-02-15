@@ -1,4 +1,6 @@
-from utils import *
+import datetime
+
+import utils.utils as util
 
 
 class NGraph:
@@ -10,8 +12,8 @@ class NGraph:
         self.start_time = start_time
         self.end_time = end_time
         self.time_taken = end_time - start_time
-        self.start_index = parse_index(start_index)
-        self.end_index = parse_index(end_index)
+        self.start_index = util.parse_index(start_index)
+        self.end_index = util.parse_index(end_index)
 
     def append(self, key, new_end_time, new_end_index):
         self.name += key
@@ -22,12 +24,15 @@ class NGraph:
     def append_event(self, event):
         self.name += event['text']
         self.n += len(event['text'])
-        self.end_time = parse_date(event['time'])
-        self.end_index = parse_index(event['index'])
+        self.end_time = util.parse_date(event['time'])
+        self.end_index = util.parse_index(event['index'])
         self.recalculate_time_taken()
 
     def recalculate_time_taken(self):
         self.time_taken = self.end_time - self.start_time
+
+    def to_list(self) -> list:
+        return [self.name, self.n, self.start_time, self.end_time, self.time_taken, self.start_index, self.end_index]
 
     def to_csv_line(self):
         return "\"" + self.name + "\"" + "," + \
@@ -40,7 +45,7 @@ class NGraph:
 
     @staticmethod
     def from_events(event1, event2):
-        return NGraph(event1['text'] + event2['text'], parse_date(event1['time']), parse_date(event2['time']),
+        return NGraph(event1['text'] + event2['text'], util.parse_date(event1['time']), util.parse_date(event2['time']),
                       event1['index'], event2['index'])
 
     def __str__(self):

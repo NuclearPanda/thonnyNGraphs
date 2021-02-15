@@ -1,6 +1,6 @@
 import json
-from utils import *
-from Ngraph import NGraph
+from objects.ngraph import NGraph
+from utils.utils import increment_index, parse_index
 
 
 def read_file(filename):
