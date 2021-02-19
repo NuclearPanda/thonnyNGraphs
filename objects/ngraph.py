@@ -34,6 +34,9 @@ class NGraph:
     def to_list(self) -> list:
         return [self.name, self.n, self.start_time, self.end_time, self.time_taken, self.start_index, self.end_index]
 
+    def to_table_entry(self) -> dict:
+        return {'ngraph': self.name, 'start time': self.start_time, 'end time': self.end_time, 'time taken': self.time_taken, 'start index': self.start_index, 'end index': self.end_index}
+
     def to_csv_line(self):
         return "\"" + self.name + "\"" + "," + \
                "\"" + str(self.n) + "\"" + "," + \

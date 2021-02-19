@@ -47,3 +47,10 @@ class LogFile:
                 if (item.time_taken - timeout).total_seconds() > 0:
                     continue
                 out_file.write(item.to_csv_line() + "\n")
+
+    def to_table_format(self, n):
+        out = {}
+        data = self.get_ngraphs(n)
+        for i, item in enumerate(data):
+            out[i] = item.to_table_entry()
+        return out
