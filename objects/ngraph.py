@@ -4,7 +4,7 @@ import utils.utils as util
 
 
 class NGraph:
-    CSV_HEADER_ROW = "ngraph,n,start_time,end_time,time_taken,start_index,end_index"
+    CSV_HEADER_ROW = "n-graph,n,start_time,end_time,time_taken,start_index,end_index"
 
     def __init__(self, keystrokes: str, start_time: datetime, end_time: datetime, start_index, end_index):
         self.name = keystrokes
@@ -32,19 +32,12 @@ class NGraph:
         self.time_taken = self.end_time - self.start_time
 
     def to_list(self) -> list:
-        return [self.name, self.n, self.start_time, self.end_time, self.time_taken, self.start_index, self.end_index]
+        return [self.name, self.n, self.start_time, self.end_time, self.time_taken.total_seconds(), self.start_index,
+                self.end_index]
 
     def to_table_entry(self) -> dict:
-        return {'ngraph': self.name, 'start time': self.start_time, 'end time': self.end_time, 'time taken': self.time_taken, 'start index': self.start_index, 'end index': self.end_index}
-
-    def to_csv_line(self):
-        return "\"" + self.name + "\"" + "," + \
-               "\"" + str(self.n) + "\"" + "," + \
-               "\"" + str(self.start_time) + "\"" + "," + \
-               "\"" + str(self.end_time) + "\"" + "," + \
-               "\"" + str(self.time_taken.total_seconds()) + "\"" + "," + \
-               "\"" + str(self.start_index) + "\"" + "," + \
-               "\"" + str(self.end_index) + "\""
+        return {'n-graph': self.name, 'start time': self.start_time, 'end time': self.end_time,
+                'time taken': self.time_taken, 'start index': self.start_index, 'end index': self.end_index}
 
     @staticmethod
     def from_events(event1, event2):
