@@ -48,7 +48,7 @@ class MainApplication(tk.Frame):
         self.table = None  # type: NGraphTable
         self.log = None  # type: LogFile
         self.chart = None  # type: FigureCanvasTkAgg
-        self.origianl_data = None
+        self.original_data = None
         self.grouped_data = None
         self.chart_frame = None
         self.chart_shown = False
@@ -100,7 +100,7 @@ class MainApplication(tk.Frame):
             self.lbl.configure(text=self.path)
         self.log = LogFile(self.path)
         data = self.log.get_ngraphs(int(self.NVar.get()))
-        self.origianl_data = data
+        self.original_data = data
         data = self.group_data(data)
         self.table = NGraphTable(self.table_frame, dataframe=data, editable=False, rows=30)
         self.table.show()
@@ -133,12 +133,11 @@ class MainApplication(tk.Frame):
         figure = plt.Figure(figsize=(10, 10), dpi=80)
         ax = figure.add_subplot(211)
         ax2 = figure.add_subplot(212)
-        data = pd.read_csv('temp.csv', encoding='utf8')
+        data = self.original_data
         self.chart = FigureCanvasTkAgg(figure, self.chart_frame)
         self.chart.get_tk_widget()
         self.chart.get_tk_widget().pack(side=tkinter.TOP, fill=tkinter.BOTH, expand=1)
         data['n-graph'].value_counts().sort_values(ascending=False)[:50].plot(kind='bar', legend=False, ax=ax)
-        tk.Frame()
         chart2data = data[['n-graph', 'time_taken']]
         chart2data.groupby(data['n-graph']).mean().sort_values('time_taken', ascending=False)[:50].plot(kind='bar',
                                                                                                         legend=False,
@@ -150,6 +149,7 @@ class MainApplication(tk.Frame):
         if not self.chart_shown:
             return
         if self.chart is not None:
+            self.chart_shown = False
             self.chart_frame.destroy()
 
     def save_file(self):
@@ -161,7 +161,7 @@ class MainApplication(tk.Frame):
         if self.is_grouped_values.get():
             self.table = NGraphTable(self.table_frame, dataframe=self.grouped_data, editable=False)
         else:
-            self.table = NGraphTable(self.table_frame, dataframe=self.origianl_data, editable=False)
+            self.table = NGraphTable(self.table_frame, dataframe=self.original_data, editable=False)
         self.table.show()
         self.table.redraw()
 
@@ -177,7 +177,7 @@ class MainApplication(tk.Frame):
         self.table.destroy()
         data = self.log.get_ngraphs(new_n)
         data['n-graph'] = data['n-graph'].str.replace(' ', '⎵')
-        self.origianl_data = data
+        self.original_data = data
         if self.is_grouped_values.get():
             data = self.group_data(data)
         self.table = NGraphTable(self.table_frame, dataframe=data, editable=False)
