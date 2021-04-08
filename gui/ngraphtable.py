@@ -18,9 +18,11 @@ class NGraphTable(pandastable.Table):
             filename = filedialog.asksaveasfilename(parent=self.master,
                                                     defaultextension='.csv',
                                                     filetypes=[("csv", "*.csv"),
-                                                               ("excel", "*.xls"),
-                                                               ("html", "*.html"),
+                                                               ("excel", "*.xlsx"),
                                                                ("All files", "*.*")])
         if filename:
-            self.model.save(filename)
+            if filename[-4:] == 'xlsx':
+                self.model.df.to_excel(filename, encoding='utf8')
+            else:
+                self.model.df.to_csv(filename, encoding='utf8', sep=";", index=False)
         return

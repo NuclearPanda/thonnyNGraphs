@@ -4,7 +4,6 @@ import utils.utils as util
 
 
 class NGraph:
-    CSV_HEADER_ROW = "n-graph,n,start_time,end_time,time_taken,start_index,end_index"
 
     def __init__(self, keystrokes: str, start_time: datetime, end_time: datetime, start_index, end_index):
         self.name = keystrokes
@@ -35,9 +34,6 @@ class NGraph:
         return [self.name, self.n, self.start_time, self.end_time, self.time_taken.total_seconds(), self.start_index,
                 self.end_index]
 
-    def to_table_entry(self) -> dict:
-        return {'n-graph': self.name, 'start time': self.start_time, 'end time': self.end_time,
-                'time taken': self.time_taken, 'start index': self.start_index, 'end index': self.end_index}
 
     @staticmethod
     def from_events(event1, event2):
@@ -47,8 +43,8 @@ class NGraph:
     def __str__(self):
         return "NGraph( name = '" + self.name + "'" + \
                ", n = " + str(self.n) + \
-               ", start_time = " + str(self.start_time) + \
-               ", end_time = " + str(self.end_time) + \
-               ", time_taken = " + str(self.time_taken) + \
+               ", start_aeg = " + str(self.start_time) + \
+               ", lõpp_time = " + str(self.end_time) + \
+               ", aeg = " + str(self.time_taken) + \
                ", start_index = " + str(self.start_index) + \
-               ", end_index = " + str(self.end_index)
+               ", lõpp_index = " + str(self.end_index)
