@@ -2,13 +2,11 @@ import tkinter as tk
 import tkinter.filedialog
 from tkinter import ttk
 
-import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 from gui.ngraphtable import NGraphTable
 from objects.logfile import LogFile
-import matplotlib.font_manager
 
 
 def popup_message1(parent, message):
@@ -24,7 +22,7 @@ def popup_message1(parent, message):
 
 def popup_msg(msg):
     popup = tk.Tk()
-    popup.wm_title("!")
+    popup.wm_title("Viga")
     label = ttk.Label(popup, text=msg)
     label.pack(side="top", fill="x", pady=10)
     B1 = ttk.Button(popup, text="Okay", command=popup.destroy)
@@ -53,7 +51,6 @@ def center(win):
 def group_data(data):
     if data.empty:
         raise Exception("Data empty, should never have gotten this far")
-    print(data.empty)
     data = data[['n-graaf', 'aeg']].groupby(data['n-graaf'])
     data = data.agg({
         'n-graaf': ['count'],
@@ -120,10 +117,6 @@ class MainApplication(tk.Frame):
         entryN = tk.Entry(self.toolbar, textvariable=self.NVar, width=5)
         entryN.pack(side='left')
 
-
-
-
-
         label = tk.Label(self.toolbar, text="Min aeg:")
         label.pack(side='left')
         self.time_cutoff_min_var = tk.DoubleVar(self.toolbar, value=0)
@@ -149,7 +142,6 @@ class MainApplication(tk.Frame):
         filter_entry = tk.Entry(self.toolbar, textvariable=self.filter_var, width=10)
         filter_entry.pack(side='left')
 
-
         self.table_frame = tk.Frame(self)
         self.table_frame.pack(side="left", expand=True, fill='both')
 
@@ -160,13 +152,18 @@ class MainApplication(tk.Frame):
     def choose_file(self):
         self.path = tk.filedialog.askopenfilename(title="Select file",
                                                   filetypes=(("text files", "*.txt"), ("all files", "*.*")))
-        if self.path != "":
-            self.lbl.configure(text=self.path)
         self.log = LogFile(self.path)
-        data = self.log.get_ngraphs(get_with_default(self.NVar, int, 2))
+        try:
+            data = self.log.get_ngraphs(get_with_default(self.NVar, int, 2))
+        except Exception as e:
+            print(e)
+            popup_msg("Failis pole n-graafe või faili vorming on oodatust erinev")
+            return
         if data.empty:
             popup_msg("Failis pole n-graafe või faili vorming on oodatust erinev")
             return
+
+        self.lbl.configure(text=self.path)
         data = perform_replacements(data)
         self.original_data = data
         data = group_data(data)
@@ -190,7 +187,7 @@ class MainApplication(tk.Frame):
         figure = plt.Figure(figsize=(10, 10), dpi=80)
         ax = figure.add_subplot(211)
         ax2 = figure.add_subplot(212)
-        data = self.original_data
+        data = self.get_filtered_data()
         self.chart = FigureCanvasTkAgg(figure, self.chart_frame)
         self.chart.get_tk_widget()
         self.chart.get_tk_widget().pack(side=tkinter.TOP, fill=tkinter.BOTH, expand=1)
@@ -248,14 +245,19 @@ class MainApplication(tk.Frame):
         return filtered_data
 
     def filter_table(self):
-        data = self.original_data
-        data = self.change_time_cutoff(data)
-        data = self.filter_table_by_str(data)
+        self.hide_graphs()
+        data = self.get_filtered_data()
         if self.is_grouped_var.get():
             data = group_data(data)
             self.grouped_data = data
         self.table.model.df = data
         self.table.redraw()
+
+    def get_filtered_data(self):
+        data = self.original_data
+        data = self.change_time_cutoff(data)
+        data = self.filter_table_by_str(data)
+        return data
 
     def get_current_data(self):
         if self.is_grouped_var.get():

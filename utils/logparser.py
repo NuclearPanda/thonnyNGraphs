@@ -29,7 +29,6 @@ def n_graphs_from_file(filename, n):
     events = get_keystroke_events(read_file(filename))
     for i in range(len(events) - n + 1):
         try:
-
             if increment_index(parse_index(events[i]['index'])) == parse_index(events[i + 1]['index']):
                 current = NGraph.from_events(events[i], events[i + 1])
                 for j in range(n - 1):
