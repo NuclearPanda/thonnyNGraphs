@@ -13,5 +13,5 @@ try:
     import pandas
 
 except ModuleNotFoundError:
-    print("installin vajalikud moodulid")
+    print("Installin vajalikud moodulid\n")
     install_reqs()

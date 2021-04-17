@@ -25,7 +25,7 @@ def popup_msg(msg):
     popup.wm_title("Viga")
     label = ttk.Label(popup, text=msg)
     label.pack(side="top", fill="x", pady=10)
-    B1 = ttk.Button(popup, text="Okay", command=popup.destroy)
+    B1 = ttk.Button(popup, text="Ok", command=popup.destroy)
     B1.pack()
     center(popup)
 
@@ -207,8 +207,10 @@ class MainApplication(tk.Frame):
             self.chart_frame.destroy()
 
     def save_file(self):
-        self.table.doExport()
-        popup_msg("Fail salvestatud")
+        if self.table.doExport():
+            popup_msg("Fail salvestatud")
+
+
 
     def toggle_grouped_values(self):
         self.table.clearData()

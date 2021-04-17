@@ -25,4 +25,6 @@ class NGraphTable(pandastable.Table):
                 self.model.df.to_excel(filename, encoding='utf8')
             else:
                 self.model.df.to_csv(filename, encoding='utf8', sep=";", index=False)
-        return
+        else:
+            return False
+        return True
