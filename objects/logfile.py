@@ -8,7 +8,7 @@ class LogFile:
         self.path = path
         self.cache = dict()
 
-    def get_ngraphs(self, n) -> pd.DataFrame:  # return a dataframe of ngraphs
+    def get_ngraphs(self, n) -> pd.DataFrame:
         if n in self.cache.keys():
             return self.cache[n]
         result = parser.n_graphs_from_file(self.path, n)

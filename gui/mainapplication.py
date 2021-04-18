@@ -191,9 +191,9 @@ class MainApplication(tk.Frame):
         self.chart = FigureCanvasTkAgg(figure, self.chart_frame)
         self.chart.get_tk_widget()
         self.chart.get_tk_widget().pack(side=tkinter.TOP, fill=tkinter.BOTH, expand=1)
-        data['n-graaf'].value_counts().sort_values(ascending=False)[:50].plot(kind='bar', legend=False, ax=ax)
+        data['n-graaf'].value_counts().sort_values(ascending=False)[:25][::-1].plot(kind='barh', legend=False, ax=ax)
         chart2data = data[['n-graaf', 'aeg']]
-        chart2data.groupby(data['n-graaf']).mean().sort_values('aeg', ascending=False)[:50].plot(kind='bar',
+        chart2data.groupby(data['n-graaf']).mean().sort_values('aeg', ascending=False)[:25][::-1].plot(kind='barh',
                                                                                                  legend=False,
                                                                                                  ax=ax2)
         ax.set_title('N-graafide esinemine')
