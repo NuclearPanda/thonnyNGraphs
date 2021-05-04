@@ -89,6 +89,7 @@ class MainApplication(tk.Frame):
         self.grouped_data = None
         self.chart_frame = None
         self.chart_shown = False
+        self.controls = []
 
         self.lbl = tk.Label(parent, text="Faili pole valitud")
         self.lbl.pack()
@@ -99,57 +100,63 @@ class MainApplication(tk.Frame):
         choose_button = tk.Button(self.toolbar, text="Vali fail", command=self.choose_file)
         choose_button.pack(side="left")
 
-        show_graphs_button = tk.Button(self.toolbar, text="Näita/peida graafikud", command=self.toggle_graphs)
+        show_graphs_button = tk.Button(self.toolbar, text="Näita/peida graafikud", command=self.toggle_graphs,
+                                       state="disabled")
         show_graphs_button.pack(side="left")
+        self.controls.append(show_graphs_button)
 
-        save_button = tk.Button(self.toolbar, text="Salvesta faili", command=self.save_file)
+        group_table_button = tk.Button(self.toolbar, text="Grupeeri tabel", command=self.toggle_grouped_values,
+                                       state="disabled")
+        group_table_button.pack(side="left")
+        self.controls.append(group_table_button)
+
+        save_button = tk.Button(self.toolbar, text="Salvesta faili", command=self.save_file, state="disabled")
         save_button.pack(side="left")
+        self.controls.append(save_button)
 
-        self.is_grouped_var = tk.IntVar(self.toolbar, 1)
-        checkbox = tk.Checkbutton(self.toolbar, text="Grupeeritud tabel", variable=self.is_grouped_var,
-                                  command=self.toggle_grouped_values)
-        checkbox.pack(side='left')
+        self.is_grouped = True
 
         label = tk.Label(self.toolbar, text="N=")
         label.pack(side='left')
         self.NVar = tk.StringVar(self.toolbar, value='2')
         self.NVar.trace_add("write", lambda name, index, mode: self.change_n())
-        entryN = tk.Entry(self.toolbar, textvariable=self.NVar, width=5)
+        entryN = tk.Entry(self.toolbar, textvariable=self.NVar, width=5, state="disabled")
         entryN.pack(side='left')
+        self.controls.append(entryN)
 
         label = tk.Label(self.toolbar, text="Min aeg:")
         label.pack(side='left')
         self.time_cutoff_min_var = tk.DoubleVar(self.toolbar, value=0)
         self.time_cutoff_min_var.trace_add("write", lambda name, index, mode: self.filter_table())
-
-        time_cutoff_min_entry = tk.Entry(self.toolbar, textvariable=self.time_cutoff_min_var, width=5)
+        time_cutoff_min_entry = tk.Entry(self.toolbar, textvariable=self.time_cutoff_min_var, width=5, state="disabled")
         time_cutoff_min_entry.pack(side='left')
+        self.controls.append(time_cutoff_min_entry)
 
         self.time_cutoff_max_var = tk.DoubleVar(self.toolbar, value=100)
         self.time_cutoff_max_var.trace_add("write", lambda name, index, mode: self.filter_table())
-
         label = tk.Label(self.toolbar, text="Max aeg:")
         label.pack(side='left')
-        time_cutoff_max_entry = tk.Entry(self.toolbar, textvariable=self.time_cutoff_max_var, width=5)
+        time_cutoff_max_entry = tk.Entry(self.toolbar, textvariable=self.time_cutoff_max_var, width=5, state="disabled")
         time_cutoff_max_entry.pack(side='left')
+        self.controls.append(time_cutoff_max_entry)
 
         label = tk.Label(self.toolbar, text="Otsing:")
         label.pack(side='left')
-
         self.filter_var = tk.StringVar(self.toolbar, value='')
         self.filter_var.trace_add("write", lambda name, index, mode: self.filter_table())
-
-        filter_entry = tk.Entry(self.toolbar, textvariable=self.filter_var, width=10)
+        filter_entry = tk.Entry(self.toolbar, textvariable=self.filter_var, width=10, state="disabled")
         filter_entry.pack(side='left')
+        self.controls.append(filter_entry)
 
         self.table_frame = tk.Frame(self)
         self.table_frame.pack(side="left", expand=True, fill='both')
 
-        # matplotlib.rc('font', family='TkDefaultFont')
-        # matplotlib.rc('font', **{'sans-serif': 'Arial',
-        #                          'family': 'sans-serif'})
+    def enable_buttons(self):
+        for item in self.controls:
+            item["state"] = "normal"
 
     def choose_file(self):
+        old_path = self.path
         self.path = tk.filedialog.askopenfilename(title="Select file",
                                                   filetypes=(("text files", "*.txt"), ("all files", "*.*")))
         self.log = LogFile(self.path)
@@ -158,9 +165,11 @@ class MainApplication(tk.Frame):
         except Exception as e:
             print(e)
             popup_msg("Failis pole n-graafe või faili vorming on oodatust erinev")
+            self.path = old_path
             return
         if data.empty:
             popup_msg("Failis pole n-graafe või faili vorming on oodatust erinev")
+            self.path = old_path
             return
 
         self.lbl.configure(text=self.path)
@@ -171,6 +180,8 @@ class MainApplication(tk.Frame):
         self.table = NGraphTable(self.table_frame, dataframe=data, editable=False, rows=30)
         self.table.show()
         self.table.redraw()
+        self.enable_buttons()
+        self.redraw_graphs()
 
     def toggle_graphs(self):
         if self.path is None:
@@ -183,7 +194,8 @@ class MainApplication(tk.Frame):
 
         self.chart_shown = True
         self.chart_frame = tk.Frame(self)
-        self.chart_frame.pack(side="right", expand=True, fill='y')
+        self.chart_frame.pack(side="right", expand=True,
+                              fill='y')  # TODO could probably not do this every time and get better responsiveness
         figure = plt.Figure(figsize=(10, 10), dpi=80)
         ax = figure.add_subplot(211)
         ax2 = figure.add_subplot(212)
@@ -194,10 +206,15 @@ class MainApplication(tk.Frame):
         data['n-graaf'].value_counts().sort_values(ascending=False)[:25][::-1].plot(kind='barh', legend=False, ax=ax)
         chart2data = data[['n-graaf', 'aeg']]
         chart2data.groupby(data['n-graaf']).mean().sort_values('aeg', ascending=False)[:25][::-1].plot(kind='barh',
-                                                                                                 legend=False,
-                                                                                                 ax=ax2)
+                                                                                                       legend=False,
+                                                                                                       ax=ax2)
         ax.set_title('N-graafide esinemine')
         ax2.set_title('N-graafide keskmine tippimise aeg')
+
+    def redraw_graphs(self):
+        if self.chart_shown:
+            self.toggle_graphs()
+            self.toggle_graphs()
 
     def hide_graphs(self):
         if not self.chart_shown:
@@ -210,17 +227,9 @@ class MainApplication(tk.Frame):
         if self.table.doExport():
             popup_msg("Fail salvestatud")
 
-
-
     def toggle_grouped_values(self):
-        self.table.clearData()
-        self.table.destroy()
-        if self.is_grouped_var.get():
-            self.table = NGraphTable(self.table_frame, dataframe=self.grouped_data, editable=False)
-        else:
-            self.table = NGraphTable(self.table_frame, dataframe=self.original_data, editable=False)
-        self.table.show()
-        self.table.redraw()
+        self.is_grouped = not self.is_grouped
+        self.filter_table()
 
     def change_n(self):
         new_n = get_with_default(self.NVar, int, 0)
@@ -229,7 +238,6 @@ class MainApplication(tk.Frame):
         data = self.log.get_ngraphs(new_n)
         data = perform_replacements(data)
         self.original_data = data
-        self.hide_graphs()
         self.filter_table()
 
     def change_time_cutoff(self, data):
@@ -247,13 +255,14 @@ class MainApplication(tk.Frame):
         return filtered_data
 
     def filter_table(self):
-        self.hide_graphs()
         data = self.get_filtered_data()
-        if self.is_grouped_var.get():
+        if self.is_grouped:
             data = group_data(data)
             self.grouped_data = data
         self.table.model.df = data
         self.table.redraw()
+        self.table.autoResizeColumns()
+        self.redraw_graphs()
 
     def get_filtered_data(self):
         data = self.original_data
@@ -262,7 +271,7 @@ class MainApplication(tk.Frame):
         return data
 
     def get_current_data(self):
-        if self.is_grouped_var.get():
+        if self.is_grouped:
             return self.grouped_data
         else:
             return self.original_data

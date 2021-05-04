@@ -16,7 +16,7 @@ class LogFile:
             result[i] = result[i].to_list()
 
         df = pd.DataFrame(result,
-                          columns=["n-graaf", "n", "start_aeg", "lõpp_aeg", "aeg", "start_index", "lõpp_index"])
+                          columns=["n-graaf", "start_aeg", "lõpp_aeg", "aeg", "start_index", "lõpp_index"])
 
         self.cache[n] = df
         return df

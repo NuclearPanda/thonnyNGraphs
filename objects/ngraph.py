@@ -31,9 +31,8 @@ class NGraph:
         self.time_taken = self.end_time - self.start_time
 
     def to_list(self) -> list:
-        return [self.name, self.n, self.start_time, self.end_time, self.time_taken.total_seconds(), self.start_index,
+        return [self.name, self.start_time, self.end_time, self.time_taken.total_seconds(), self.start_index,
                 self.end_index]
-
 
     @staticmethod
     def from_events(event1, event2):

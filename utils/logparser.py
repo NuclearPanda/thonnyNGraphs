@@ -3,7 +3,7 @@ from objects.ngraph import NGraph
 from utils.utils import increment_index, parse_index
 
 
-def read_file(filename):
+def read_file(filename):  # TODO could optimize by caching this
     with open(filename) as f:
         data = f.read()
         log = json.loads(data)
