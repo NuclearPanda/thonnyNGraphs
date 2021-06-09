@@ -57,7 +57,7 @@ def group_data(data):
         'aeg': ['mean', 'min', 'max']
     })
     data = data.reset_index()
-    data = data.sort_values(('n-graaf', 'count'), ascending=False)
+    data = data.sort_values(('n-graaf', 'count'), ascending=False, kind='mergesort')
     return data
 
 
@@ -175,6 +175,7 @@ class MainApplication(tk.Frame):
         self.lbl.configure(text=self.path)
         data = perform_replacements(data)
         self.original_data = data
+        data = self.get_filtered_data()
         data = group_data(data)
         self.grouped_data = data
         self.table = NGraphTable(self.table_frame, dataframe=data, editable=False, rows=30)
@@ -203,11 +204,9 @@ class MainApplication(tk.Frame):
         self.chart = FigureCanvasTkAgg(figure, self.chart_frame)
         self.chart.get_tk_widget()
         self.chart.get_tk_widget().pack(side=tkinter.TOP, fill=tkinter.BOTH, expand=1)
-        data['n-graaf'].value_counts().sort_values(ascending=False)[:25][::-1].plot(kind='barh', legend=False, ax=ax)
+        data['n-graaf'].groupby(data['n-graaf']).count().sort_values(ascending=False, kind='mergesort')[:25][::-1].plot(kind='barh', legend=False, ax=ax)
         chart2data = data[['n-graaf', 'aeg']]
-        chart2data.groupby(data['n-graaf']).mean().sort_values('aeg', ascending=False)[:25][::-1].plot(kind='barh',
-                                                                                                       legend=False,
-                                                                                                       ax=ax2)
+        chart2data.groupby(data['n-graaf']).mean().sort_values('aeg', ascending=False, kind='mergesort')[:25][::-1].plot(kind='barh', legend=False, ax=ax2)
         ax.set_title('N-graafide esinemine')
         ax2.set_title('N-graafide keskmine tippimise aeg')
 
